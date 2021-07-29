@@ -1,41 +1,105 @@
-const searchButton = document.querySelector('.btn-search')
-searchButton.addEventListener('click',function() {
-    const movieKeyword = document.querySelector('.input-keyword')
-    const keyword = movieKeyword.value
+// const searchButton = document.querySelector('.btn-search')
+// searchButton.addEventListener('click',function() {
+//     const movieKeyword = document.querySelector('.input-keyword')
+//     const keyword = movieKeyword.value
     
-    fetch(`https://www.omdbapi.com/?s=${keyword}&apikey=346fd566`)
-        .then(response => response.json()).then(response => {
-            const movies = response.Search
+//     fetch(`https://www.omdbapi.com/?s=${keyword}&apikey=346fd566`)
+//         .then(response => response.json()).then(response => {
+//             const movies = response.Search
 
-            let movie = ''
+//             let movie = ''
 
-            movies.forEach(m => {
-                movie += showCards(m)
-            })
+//             movies.forEach(m => {
+//                 movie += showCards(m)
+//             })
 
-            const movieContainer = document.querySelector('.movie-container')
-            movieContainer.innerHTML = movie; 
+//             const movieContainer = document.querySelector('.movie-container')
+//             movieContainer.innerHTML = movie; 
 
-            const detailButton = document.querySelectorAll('.btn-modal')
-            detailButton.forEach(db => {
-                db.addEventListener('click', function() {
-                    const imdbid = this.dataset.imdbid;
-                    fetch(`https://www.omdbapi.com/?i=${imdbid}&apikey=346fd566`)
-                        .then(response => response.json())
-                        .then( m => {
-                            let showDetail = ''
-                            const detailBody = document.querySelector('.detail-body')
-                            showDetail += showDetailModal(m)
+//             const detailButton = document.querySelectorAll('.btn-modal')
+//             detailButton.forEach(db => {
+//                 db.addEventListener('click', function() {
+//                     const imdbid = this.dataset.imdbid;
+//                     fetch(`https://www.omdbapi.com/?i=${imdbid}&apikey=346fd566`)
+//                         .then(response => response.json())
+//                         .then( m => {
+//                             let showDetail = ''
+//                             const detailBody = document.querySelector('.detail-body')
+//                             showDetail += showDetailModal(m)
 
-                            detailBody.innerHTML = showDetail
+//                             detailBody.innerHTML = showDetail
 
 
-                        })
-                })
-            })
-        })
+//                         })
+//                 })
+//             })
+//         })
+// })
+
+const searchButton = document.querySelector('.btn-search')
+searchButton.addEventListener('click', async function() {
+    const searchKeyword = document.querySelector('.input-keyword');
+    const keyword = searchKeyword.value;
+    
+    const movies = await getMovies(keyword)
+
+    updateUI(movies)
+
+    // console.log(movies)
 })
 
+// Event binding untuk menangkap tombol detail
+document.addEventListener('click', async function(e) {
+    if(e.target.classList.contains('btn-modal'))
+    {
+        const imdbid = e.target.dataset.imdbid;
+        const movieDetail = await getMovieDetail(imdbid);
+
+        console.log(movieDetail)
+
+        UpdateUIDetail(movieDetail)
+    }
+})
+
+function getMovies(keyword)
+{
+    return fetch(`https://www.omdbapi.com/?s=${keyword}&apikey=346fd566`)
+    .then(response => response.json())
+    .then(response => response.Search)
+}
+
+
+
+
+function updateUI(movies)
+{
+    let cards = ''
+    movies.forEach(m => cards += showCards(m));
+
+    const movieContainer = document.querySelector('.movie-container')
+    movieContainer.innerHTML = cards;
+}
+
+function getMovieDetail(imdbid)
+{
+    return fetch(`https://www.omdbapi.com/?i=${imdbid}&apikey=346fd566`)
+        .then(response => response.json())
+        .then(response => {
+            return response
+        })
+        
+}
+
+function UpdateUIDetail(m)
+{
+    let cardDetail = showDetailModal(m)
+
+    const detailBody = document.querySelector('.detail-body')
+
+    detailBody.innerHTML = cardDetail
+
+
+}
 
 
 

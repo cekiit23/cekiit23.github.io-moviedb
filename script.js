@@ -1,49 +1,18 @@
-// const searchButton = document.querySelector('.btn-search')
-// searchButton.addEventListener('click',function() {
-//     const movieKeyword = document.querySelector('.input-keyword')
-//     const keyword = movieKeyword.value
-    
-//     fetch(`https://www.omdbapi.com/?s=${keyword}&apikey=346fd566`)
-//         .then(response => response.json()).then(response => {
-//             const movies = response.Search
-
-//             let movie = ''
-
-//             movies.forEach(m => {
-//                 movie += showCards(m)
-//             })
-
-//             const movieContainer = document.querySelector('.movie-container')
-//             movieContainer.innerHTML = movie; 
-
-//             const detailButton = document.querySelectorAll('.btn-modal')
-//             detailButton.forEach(db => {
-//                 db.addEventListener('click', function() {
-//                     const imdbid = this.dataset.imdbid;
-//                     fetch(`https://www.omdbapi.com/?i=${imdbid}&apikey=346fd566`)
-//                         .then(response => response.json())
-//                         .then( m => {
-//                             let showDetail = ''
-//                             const detailBody = document.querySelector('.detail-body')
-//                             showDetail += showDetailModal(m)
-
-//                             detailBody.innerHTML = showDetail
-
-
-//                         })
-//                 })
-//             })
-//         })
-// })
-
 const searchButton = document.querySelector('.btn-search')
 searchButton.addEventListener('click', async function() {
-    const searchKeyword = document.querySelector('.input-keyword');
-    const keyword = searchKeyword.value;
+    try {
+        const searchKeyword = document.querySelector('.input-keyword');
+        const keyword = searchKeyword.value;
+        
+        const movies = await getMovies(keyword)
     
-    const movies = await getMovies(keyword)
-
-    updateUI(movies)
+        updateUI(movies)
+    } catch (error) {
+        const Error = `<h1 style="text-align: center; color: red; font-family: Arial">${error}</h1>`
+        const movieContainer = document.querySelector('.movie-container')
+        movieContainer.innerHTML = Error;
+        
+    }
 
     // console.log(movies)
 })
@@ -64,8 +33,20 @@ document.addEventListener('click', async function(e) {
 function getMovies(keyword)
 {
     return fetch(`https://www.omdbapi.com/?s=${keyword}&apikey=346fd566`)
-    .then(response => response.json())
-    .then(response => response.Search)
+    .then(response => {
+        if(!response.ok) {
+            throw new Error(response.statusText);
+
+        }
+        return response.json();
+    })
+    .then(response => {
+        if (response.Response === "False" ) {
+            throw new Error(response.Error)
+        }
+
+        return response.Search
+    })
 }
 
 
